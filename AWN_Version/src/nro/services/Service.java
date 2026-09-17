@@ -359,6 +359,12 @@ public class Service {
                 } else if (smallId >= 30378 && smallId <= 30419) {
                     msg.writer().writeShort(75);
                     msg.writer().writeShort(75);
+                } else if (smallId == 20664 || smallId == 20702) {
+                    msg.writer().writeShort(75);
+                    msg.writer().writeShort(75);
+                } else if (smallId == 20418) {
+                    msg.writer().writeShort(36);
+                    msg.writer().writeShort(40);
                 } else {
                     msg.writer().writeShort(65);
                     msg.writer().writeShort(65);
@@ -403,6 +409,12 @@ public class Service {
             } else if (smallId >= 30378 && smallId <= 30419) {
                 msg.writer().writeShort(75);
                 msg.writer().writeShort(75);
+            } else if (smallId == 20664 || smallId == 20702) {
+                msg.writer().writeShort(75);
+                msg.writer().writeShort(75);
+            } else if (smallId == 20418) {
+                msg.writer().writeShort(36);
+                msg.writer().writeShort(40);
             } else {
                 msg.writer().writeShort(65);
                 msg.writer().writeShort(65);
