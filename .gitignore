@@ -1,0 +1,51 @@
+# === Archives & Huge Files ===
+*.rar
+*.zip
+*.7z
+*.tar.gz
+rrrr.rar
+
+# === Java Build / Compiled Files ===
+*.class
+**/build/
+**/out/
+**/target/
+**/bin/
+.gradle/
+
+# === Unity Temporary & Cache Files ===
+**/Library/
+**/Temp/
+**/Obj/
+**/Build/
+**/Builds/
+**/Logs/
+**/MemoryCaptures/
+**/Recordings/
+!**/AssetStoreTools*
+
+# === IDE & OS Temporary Files ===
+.idea/
+.vscode/
+.gemini/
+*.iml
+*.log
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === Client Large Binary Builds (Keep configs / scripts if any) ===
+Mod_Local/Panel Game_Data/
+Mod_Local/GameAssembly.dll
+Mod_Local/UnityPlayer.dll
+Mod_Local/Panel Game.exe
+Mod_Local/baselib.dll
+Mod_Local/UnityCrashHandler64.exe
+
+# === Ripped Assets & Tool Dumps ===
+tools/
+PanelGame_UnityProject/
+
+# === Temporary Scratch Scripts ===
+scratch/*.class
+AWN_Version/scratch/*.class
