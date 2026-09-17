@@ -42,6 +42,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import java.util.ArrayList;
+import java.util.List;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.DefaultListModel;
 import javax.swing.border.EmptyBorder;
 import jbcd.dao.EventDAO;
 import network.Network;
@@ -520,11 +527,23 @@ public class ServerManagerUI extends JFrame {
         String name;
         Icon icon;
         String key;
+        boolean isHeader;
+        String category;
 
-        public NavItem(String name, String iconPath, String key) {
+        public NavItem(String name, String iconPath, String key, String category) {
             this.name = name;
             this.key = key;
             this.icon = ServerGuiUtils.loadIcon(iconPath);
+            this.isHeader = false;
+            this.category = category;
+        }
+
+        public NavItem(String headerTitle) {
+            this.name = headerTitle;
+            this.key = null;
+            this.icon = null;
+            this.isHeader = true;
+            this.category = headerTitle;
         }
 
         @Override
@@ -626,6 +645,8 @@ public class ServerManagerUI extends JFrame {
     private JPanel contentPanel;
     private CardLayout cardLayout;
     private JList<NavItem> sidebar;
+    private DefaultListModel<NavItem> sidebarModel;
+    private String lastValidSelectedKey = "Dashboard";
 
     public static volatile boolean REQUEST_AUTO_RESTART = false;
 
@@ -710,34 +731,51 @@ public class ServerManagerUI extends JFrame {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        NavItem[] menuItems = {
-            new NavItem("Bảng Điều Khiển", "/icon/dashboard.png", "Dashboard"),
-            new NavItem("Quản Lý Tài Khoản", "/icon/account.png", "Account"),
-            new NavItem("Danh Sách Người Chơi", "/icon/players.png", "Players"),
-            new NavItem("Buff & Tặng Đồ / NV", "/icon/buff.png", "PlayerBuffManager"),
-            new NavItem("Cửa Hàng (Shop)", "/icon/shop.png", "ShopEditor"),
-            new NavItem("Quản Lý Giftcode", "/icon/giftcode.png", "Giftcode"),
-//            new NavItem("Nạp Thẻ & Thưởng", "/icon/topup.png", "TopupReward"),
-            new NavItem("Sự Kiện (Events)", "/icon/events.png", "Events"),
-            new NavItem("Danh Hiệu (Badges)", "/icon/badges.png", "data_badges"),
-            new NavItem("Dữ Liệu Bản Đồ", "/icon/map_data.png", "map_template"),
-            new NavItem("Dữ Liệu Vật Phẩm", "/icon/item_data.png", "item_template"),
-            new NavItem("Lịch sử giao dịch", "/icon/transaction.png", "LichSuGd"),
-            new NavItem("Quản Lý Radar", "/icon/radar.png", "radar"),
-            new NavItem("Quản Lý Part", "/icon/part.png", "part"),
-            new NavItem("Quản Lý Drop Item", "/icon/item_data.png", "drop_item"),
-            new NavItem("Cấu Hình Boss", "/icon/boss_config.png", "Boss Config"),
-            new NavItem("Bảo Mật & Firewall", "/icon/security.png", "Security"),
-            new NavItem("AntiDDos", "/icon/security.png", "AntiDDoS"),
+        NavItem[] allMenuItems = {
+            // Section 1: HỆ THỐNG & BẢO MẬT
+            new NavItem("⚡ HỆ THỐNG & BẢO MẬT"),
+            new NavItem("Bảng Điều Khiển", "/icon/dashboard.png", "Dashboard", "HỆ THỐNG & BẢO MẬT"),
+            new NavItem("Tường Lửa & Bảo Mật", "/icon/security.png", "Security", "HỆ THỐNG & BẢO MẬT"),
+            new NavItem("Phòng Chống Anti-DDoS", "/icon/security.png", "AntiDDoS", "HỆ THỐNG & BẢO MẬT"),
 
+            // Section 2: QUẢN LÝ NGƯỜI CHƠI
+            new NavItem("👥 QUẢN LÝ NGƯỜI CHƠI"),
+            new NavItem("Quản Lý Tài Khoản", "/icon/account.png", "Account", "QUẢN LÝ NGƯỜI CHƠI"),
+            new NavItem("Danh Sách Người Chơi", "/icon/players.png", "Players", "QUẢN LÝ NGƯỜI CHƠI"),
+            new NavItem("Buff Chỉ Số, Đồ & NV", "/icon/buff.png", "PlayerBuffManager", "QUẢN LÝ NGƯỜI CHƠI"),
+            new NavItem("Lịch Sử Giao Dịch", "/icon/transaction.png", "LichSuGd", "QUẢN LÝ NGƯỜI CHƠI"),
+
+            // Section 3: SỰ KIỆN & PHẦN THƯỞNG
+            new NavItem("🎁 SỰ KIỆN & PHẦN THƯỞNG"),
+            new NavItem("Quản Lý Sự Kiện", "/icon/events.png", "Events", "SỰ KIỆN & PHẦN THƯỞNG"),
+            new NavItem("Quản Lý Giftcode", "/icon/giftcode.png", "Giftcode", "SỰ KIỆN & PHẦN THƯỞNG"),
+            new NavItem("Quản Lý Danh Hiệu", "/icon/badges.png", "data_badges", "SỰ KIỆN & PHẦN THƯỞNG"),
+            new NavItem("Nạp Thẻ & Thưởng Mốc", "/icon/topup.png", "TopupReward", "SỰ KIỆN & PHẦN THƯỞNG"),
+
+            // Section 4: CỬA HÀNG & TRANG BỊ
+            new NavItem("🛒 CỬA HÀNG & TRANG BỊ"),
+            new NavItem("Cửa Hàng NPC (Shop)", "/icon/shop.png", "ShopEditor", "CỬA HÀNG & TRANG BỊ"),
+            new NavItem("Dữ Liệu Vật Phẩm", "/icon/item_data.png", "item_template", "CỬA HÀNG & TRANG BỊ"),
+            new NavItem("Quản Lý Tỉ Lệ Drop", "/icon/item_data.png", "drop_item", "CỬA HÀNG & TRANG BỊ"),
+
+            // Section 5: THẾ GIỚI & CẤU HÌNH BOSS
+            new NavItem("🗺️ THẾ GIỚI & BẢN ĐỒ"),
+            new NavItem("Cấu Hình Boss", "/icon/boss_config.png", "Boss Config", "THẾ GIỚI & BẢN ĐỒ"),
+            new NavItem("Dữ Liệu Bản Đồ", "/icon/map_data.png", "map_template", "THẾ GIỚI & BẢN ĐỒ"),
+            new NavItem("Bộ Sưu Tập Radar", "/icon/radar.png", "radar", "THẾ GIỚI & BẢN ĐỒ"),
+            new NavItem("Quản Lý Ngoại Trang Part", "/icon/part.png", "part", "THẾ GIỚI & BẢN ĐỒ")
         };
 
-        sidebar = new JList<>(menuItems);
+        sidebarModel = new DefaultListModel<>();
+        for (NavItem item : allMenuItems) {
+            sidebarModel.addElement(item);
+        }
+
+        sidebar = new JList<>(sidebarModel);
         sidebar.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        sidebar.setSelectedIndex(0);
-        sidebar.setFixedCellHeight(50);
+        sidebar.setSelectedIndex(1); // Mặc định mở Bảng Điều Khiển
         sidebar.setBackground(new Color(255, 255, 255));
-        sidebar.setBorder(new EmptyBorder(10, 0, 10, 0));
+        sidebar.setBorder(new EmptyBorder(4, 0, 8, 0));
 
         sidebar.setCellRenderer(new DefaultListCellRenderer() {
             @Override
@@ -746,36 +784,154 @@ public class ServerManagerUI extends JFrame {
                 if (value instanceof NavItem) {
                     NavItem item = (NavItem) value;
                     lbl.setText(item.name);
-                    if (item.icon != null) {
-                        lbl.setIcon(item.icon);
+                    if (item.isHeader) {
+                        lbl.setIcon(null);
+                        lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                        lbl.setForeground(new Color(100, 116, 139));
+                        lbl.setBackground(new Color(241, 245, 249));
+                        lbl.setPreferredSize(new Dimension(250, 32));
+                        lbl.setBorder(BorderFactory.createCompoundBorder(
+                                BorderFactory.createMatteBorder(index == 0 ? 0 : 1, 0, 1, 0, new Color(226, 232, 240)),
+                                new EmptyBorder(5, 12, 5, 10)
+                        ));
+                    } else {
+                        lbl.setFont(new Font("Segoe UI", isSelected ? Font.BOLD : Font.PLAIN, 13));
+                        if (item.icon != null) {
+                            lbl.setIcon(item.icon);
+                        }
+                        lbl.setIconTextGap(10);
+                        lbl.setPreferredSize(new Dimension(250, 38));
+                        if (isSelected) {
+                            lbl.setBackground(new Color(235, 245, 255));
+                            lbl.setForeground(new Color(0, 102, 204));
+                            lbl.setBorder(BorderFactory.createCompoundBorder(
+                                    BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(0, 120, 215)),
+                                    new EmptyBorder(0, 18, 0, 10)
+                            ));
+                        } else {
+                            lbl.setBackground(Color.WHITE);
+                            lbl.setForeground(new Color(51, 65, 85));
+                            lbl.setBorder(new EmptyBorder(0, 22, 0, 10));
+                        }
                     }
-                }
-                lbl.setBorder(new EmptyBorder(0, 15, 0, 0));
-                lbl.setIconTextGap(12);
-                lbl.setFont(new Font("Segoe UI", isSelected ? Font.BOLD : Font.PLAIN, 13));
-                if (isSelected) {
-                    lbl.setBackground(new Color(230, 242, 255));
-                    lbl.setForeground(new Color(0, 102, 204));
-                    lbl.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(0, 120, 215)),
-                            new EmptyBorder(0, 11, 0, 0)
-                    ));
-                } else {
-                    lbl.setBackground(Color.WHITE);
-                    lbl.setForeground(new Color(60, 60, 60));
                 }
                 return lbl;
             }
         });
 
+        // Click / Mouse Listener: Bỏ qua khi bấm vào mục Header
+        sidebar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int index = sidebar.locationToIndex(e.getPoint());
+                if (index >= 0 && index < sidebarModel.getSize()) {
+                    NavItem item = sidebarModel.getElementAt(index);
+                    if (item.isHeader) {
+                        e.consume();
+                        EventQueue.invokeLater(() -> restoreLastValidSelection());
+                    }
+                }
+            }
+        });
+
+        sidebar.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                NavItem selected = sidebar.getSelectedValue();
+                if (selected != null) {
+                    if (selected.isHeader) {
+                        EventQueue.invokeLater(() -> restoreLastValidSelection());
+                    } else {
+                        lastValidSelectedKey = selected.key;
+                        if (selected.key != null) {
+                            cardLayout.show(contentPanel, selected.key);
+                        }
+                    }
+                }
+            }
+        });
+
+        // Thanh Header phía trên sidebar: Brand info + Ô tìm kiếm chức năng
+        JPanel topSidebarPanel = new JPanel(new BorderLayout(0, 8));
+        topSidebarPanel.setBackground(Color.WHITE);
+        topSidebarPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240)),
+                new EmptyBorder(12, 12, 10, 12)
+        ));
+
+        JPanel brandPanel = new JPanel(new BorderLayout());
+        brandPanel.setOpaque(false);
+
+        JLabel lblTitle = new JLabel("SERVER MANAGER");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTitle.setForeground(new Color(15, 23, 42));
+
+        JLabel lblStatus = new JLabel("● ONLINE");
+        lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        lblStatus.setForeground(new Color(22, 163, 74));
+
+        brandPanel.add(lblTitle, BorderLayout.WEST);
+        brandPanel.add(lblStatus, BorderLayout.EAST);
+
+        JTextField txtSearch = new JTextField();
+        txtSearch.putClientProperty("JTextField.placeholderText", "🔍 Tìm kiếm tính năng...");
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtSearch.setPreferredSize(new Dimension(220, 30));
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(203, 213, 225), 1, true),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
+
+        Runnable filterAction = () -> {
+            String q = txtSearch.getText().trim().toLowerCase();
+            sidebarModel.clear();
+            if (q.isEmpty()) {
+                for (NavItem it : allMenuItems) {
+                    sidebarModel.addElement(it);
+                }
+            } else {
+                NavItem curHeader = null;
+                List<NavItem> group = new ArrayList<>();
+                for (NavItem it : allMenuItems) {
+                    if (it.isHeader) {
+                        if (curHeader != null && !group.isEmpty()) {
+                            sidebarModel.addElement(curHeader);
+                            for (NavItem c : group) sidebarModel.addElement(c);
+                        }
+                        curHeader = it;
+                        group.clear();
+                    } else {
+                        if (it.name.toLowerCase().contains(q) || (it.key != null && it.key.toLowerCase().contains(q))) {
+                            group.add(it);
+                        }
+                    }
+                }
+                if (curHeader != null && !group.isEmpty()) {
+                    sidebarModel.addElement(curHeader);
+                    for (NavItem c : group) sidebarModel.addElement(c);
+                }
+            }
+            restoreLastValidSelection();
+        };
+
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { filterAction.run(); }
+            @Override public void removeUpdate(DocumentEvent e) { filterAction.run(); }
+            @Override public void changedUpdate(DocumentEvent e) { filterAction.run(); }
+        });
+
+        topSidebarPanel.add(brandPanel, BorderLayout.NORTH);
+        topSidebarPanel.add(txtSearch, BorderLayout.CENTER);
+
         JPanel sidebarContainer = new JPanel(new BorderLayout());
-        sidebarContainer.setPreferredSize(new Dimension(240, getHeight()));
+        sidebarContainer.setPreferredSize(new Dimension(250, getHeight()));
         sidebarContainer.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)));
 
         JScrollPane scrollSidebar = new JScrollPane(sidebar);
         scrollSidebar.setBorder(null);
-        sidebarContainer.add(scrollSidebar, BorderLayout.CENTER);
+        scrollSidebar.getVerticalScrollBar().setUnitIncrement(16);
 
+        sidebarContainer.add(topSidebarPanel, BorderLayout.NORTH);
+        sidebarContainer.add(scrollSidebar, BorderLayout.CENTER);
         sidebarContainer.add(new MathSignaturePanel(), BorderLayout.SOUTH);
 
         add(sidebarContainer, BorderLayout.WEST);
@@ -803,17 +959,7 @@ public class ServerManagerUI extends JFrame {
         contentPanel.add(new SecurityPanel(), "Security");
         contentPanel.add(new AntiDDoSPanelV2(), "AntiDDoS");
 
-
         add(contentPanel, BorderLayout.CENTER);
-
-        sidebar.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                NavItem selected = sidebar.getSelectedValue();
-                if (selected != null) {
-                    cardLayout.show(contentPanel, selected.key);
-                }
-            }
-        });
 
         setSize(1280, 800);
         setMinimumSize(new Dimension(1100, 700));
@@ -835,6 +981,18 @@ public class ServerManagerUI extends JFrame {
                 }
             }
         });
+    }
+
+    private void restoreLastValidSelection() {
+        if (sidebar == null || sidebarModel == null) return;
+        for (int i = 0; i < sidebarModel.getSize(); i++) {
+            NavItem it = sidebarModel.getElementAt(i);
+            if (!it.isHeader && it.key != null && it.key.equals(lastValidSelectedKey)) {
+                sidebar.setSelectedIndex(i);
+                sidebar.ensureIndexIsVisible(i);
+                return;
+            }
+        }
     }
 
    private void startServerProcesses() {
