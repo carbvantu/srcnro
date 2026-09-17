@@ -1118,8 +1118,10 @@ public class Player implements Runnable {
                     if (this.isPl() && this.inventory != null && this.inventory.itemsBag != null && this.inventory.itemsBody.get(7) != null) {
                         Item it = this.inventory.itemsBody.get(7);
                         if (it != null && it.isNotNullItem() && this.PetFollow == null) {
-                            DetuService.PetFollow(this, it.template.head, it.template.body, it.template.leg);
-                            Service.getInstance().point(this);
+                            if (it.template.head != -1 || it.template.body != -1 || it.template.leg != -1) {
+                                DetuService.PetFollow(this, it.template.head, it.template.body, it.template.leg);
+                                Service.getInstance().point(this);
+                            }
                         }
                     } else if (this.isPl() && PetFollow != null && !this.inventory.itemsBody.get(7).isNotNullItem()) {
                         PetFollow.dispose();
