@@ -191,23 +191,7 @@ public class Command {
             Service.gI().sendThongBao(player, "Auto HS : " + (player.isAutoHoiSinh ? "[ON]" : "[OFF]"));
             return true;
         }
-          if (text.equalsIgnoreCase("anwinbuff")) {
-    if (player == null || player.getSession() == null) {
-        return true;
-    }
 
-    String username = player.getSession().uu != null
-            ? player.getSession().uu.trim().toLowerCase()
-            : "";
-
-    if (!username.equals("smilyne")) {
-        Service.gI().sendThongBao(player, "Chỉ tài khoản Smilyne mới được sử dụng lệnh này!");
-        return true;
-    }
-
-    Input.gI().createFormSenditem4(player);
-    return true;
-}
 
         if (text.equals("ad")) {
             Input.gI().createFormPassAdmin(player);

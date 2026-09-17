@@ -515,15 +515,19 @@ public class Service {
 
     public void regisAccount(Session session, Message _msg) {
         try {
-            _msg.readUTF();
-            _msg.readUTF();
-            _msg.readUTF();
-            _msg.readUTF();
-            _msg.readUTF();
-            _msg.readUTF();
-            _msg.readUTF();
-            String user = _msg.readUTF();
-            String pass = _msg.readUTF();
+            String user = _msg.readUTF().trim();
+            String pass = _msg.readUTF().trim();
+            boolean acceptedTerms = true;
+            try {
+                if (_msg.reader().available() > 0) {
+                    acceptedTerms = _msg.readBoolean();
+                }
+            } catch (Exception ignored) {
+            }
+            if (!acceptedTerms) {
+                sendThongBaoOK((MySession) session, "Bạn cần đồng ý với điều khoản để đăng ký");
+                return;
+            }
             if (!(user.length() >= 4 && user.length() <= 18)) {
                 sendThongBaoOK((MySession) session, "Tài khoản phải có độ dài 4-18 ký tự");
                 return;
@@ -532,12 +536,12 @@ public class Service {
                 sendThongBaoOK((MySession) session, "Mật khẩu phải có độ dài 5-18 ký tự");
                 return;
             }
-            CrisResultSet rs = ConnectDB.executeQuery("select * from account where username = ?", user);
+            CrisResultSet rs = ConnectDB.executeQuery("select id from account where username = ?", user);
             if (rs.next()) {
                 sendThongBaoOK((MySession) session, "Tài khoản đã tồn tại");
             } else {
-                ConnectDB.executeUpdate("insert into account (username,password) values()", user, pass);
-                sendThongBaoOK((MySession) session, "Đăng ký tài khoản thành công!");
+                ConnectDB.executeUpdate("insert into account (username, password, is_admin, vetuan, vethang, vetuan_expire, vethang_expire) values (?, ?, 0, 0, 0, 0, 0)", user, pass);
+                sendThongBaoOK((MySession) session, "Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
             }
             rs.dispose();
         } catch (Exception e) {

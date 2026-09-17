@@ -1,1 +1,0 @@
-Get-ChildItem -Path "c:\Users\vtson\Downloads\AWN_Version\AWN_Version" -Filter "*.png" -Recurse | Where-Object { $_.FullName -notmatch "data\\effect" -and $_.FullName -notmatch "data\\icon" } | Select-Object FullName, Length

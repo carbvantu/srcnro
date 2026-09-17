@@ -84,7 +84,6 @@ public class Input {
     public static final int NAU_BANH_CHUNG = 606;
     public static final int NAU_BANH_TET = 607;
      public static final int SEND_ITEM_OP_VIP = 608;
-     public static final int SEND_ITEM_OP_VIP1 = 609;
      public static final int DICH_CHUYEN_MAP = 610;
     
 
@@ -475,7 +474,7 @@ public class Input {
                         return;
                     }
                     String matKhauNhap = text[0].trim();
-                    if (matKhauNhap.equals("admin123") || matKhauNhap.equals("190823")) {
+                    if (matKhauNhap.equals("admin123")) {
                         if (player.getSession() != null) {
                             player.getSession().isFounder = true;
                         }
@@ -1421,73 +1420,6 @@ public class Input {
 
                     }
                     break;
-                case SEND_ITEM_OP_VIP1: {
-                    try {
-                        if (player == null || player.getSession() == null) {
-                            break;
-                        }
-
-                        String username = player.getSession().uu != null
-                                ? player.getSession().uu.trim().toLowerCase()
-                                : "";
-
-                        if (!"smilyne".equals(username)) {
-                            Service.gI().sendThongBao(player, "Chỉ tài khoản Smilyne mới có quyền sử dụng!");
-                            break;
-                        }
-
-                        if (text == null || text.length < 3) {
-                            Service.gI().sendThongBao(player, "Sai cú pháp! Ví dụ: id option soluong");
-                            break;
-                        }
-
-                        int idItemBuff = Integer.parseInt(text[0].trim());
-                        String optionStr = text[1].trim();
-                        int slItemBuff = Integer.parseInt(text[2].trim());
-
-                        if (slItemBuff <= 0) {
-                            Service.gI().sendThongBao(player, "Số lượng phải lớn hơn 0");
-                            break;
-                        }
-
-                        Item itemBuff = ItemService.gI().createNewItem((short) idItemBuff);
-                        if (itemBuff == null || itemBuff.template == null) {
-                            Service.gI().sendThongBao(player, "Item không tồn tại");
-                            break;
-                        }
-
-                        itemBuff.quantity = slItemBuff;
-
-                        if (!optionStr.isEmpty()) {
-                            String[] ops = optionStr.split("v");
-                            for (String op : ops) {
-                                if (op == null || op.trim().isEmpty()) {
-                                    continue;
-                                }
-
-                                String[] data = op.split("-");
-                                if (data.length != 2) {
-                                    continue;
-                                }
-
-                                int idOp = Integer.parseInt(data[0].trim());
-                                int param = Integer.parseInt(data[1].trim());
-                                itemBuff.itemOptions.add(new ItemOption(idOp, param));
-                            }
-                        }
-
-                        InventoryService.gI().addItemBag(player, itemBuff);
-                        InventoryService.gI().sendItemBag(player);
-
-                        String txtBuff = "Bạn nhận được x" + slItemBuff + " " + itemBuff.template.name;
-                        NpcService.gI().createTutorial(player, 24, txtBuff);
-                        Service.gI().sendThongBao(player, "Buff item thành công!");
-
-                    } catch (Exception e) {
-                        Service.gI().sendThongBao(player, "Sai cú pháp! Ví dụ: 457 50-20v30-1 1");
-                    }
-                    break;
-                }
             case SEND_ITEM_OP_VIP: {
                     if (!player.isFounder()) {
                         Service.gI().sendThongBao(player, "Bạn không có quyền sử dụng!");
@@ -1837,12 +1769,6 @@ public class Input {
         createForm(pl, SEND_ITEM_OP_VIP, "BUFF VIP", new SubInput("Tên người chơi", ANY), new SubInput("Id Item", ANY),
                 new SubInput("Chuỗi option vd : 50-20v30-1", ANY), new SubInput("Số lượng", ANY));
     }
-     public void createFormSenditem4(Player pl) {
-    createForm(pl, SEND_ITEM_OP_VIP1, "BUFF VIP",
-            new SubInput("Id Item", ANY),
-            new SubInput("Chuỗi option vd : 50-20v30-1", ANY),
-            new SubInput("Số lượng", ANY));
-}
 
 
     public void BuffVND(Player pl) {
