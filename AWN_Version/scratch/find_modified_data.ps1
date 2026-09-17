@@ -1,0 +1,1 @@
+Get-ChildItem -Path "c:\Users\vtson\Downloads\AWN_Version\AWN_Version\data" -Recurse | Where-Object { $_.LastWriteTime -gt (Get-Date "2026-09-01") } | Select-Object FullName, Length, LastWriteTime | Select-Object -First 50

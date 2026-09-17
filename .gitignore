@@ -1,51 +1,30 @@
-# === Archives & Huge Files ===
+# === Huge Archives (>100MB blocked by GitHub) ===
 *.rar
 *.zip
 *.7z
 *.tar.gz
+*.resS
 rrrr.rar
+AWN_Version/data/item_bg_temp.rar
+Mod_Local/Panel Game_Data/resources.assets.resS
 
 # === Java Build / Compiled Files ===
 *.class
 **/build/
 **/out/
-**/target/
 **/bin/
-.gradle/
 
-# === Unity Temporary & Cache Files ===
+# === Unity Temporary Caches ===
 **/Library/
 **/Temp/
-**/Obj/
-**/Build/
-**/Builds/
 **/Logs/
-**/MemoryCaptures/
-**/Recordings/
-!**/AssetStoreTools*
+**/obj/
 
 # === IDE & OS Temporary Files ===
 .idea/
 .vscode/
 .gemini/
-*.iml
 *.log
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
-
-# === Client Large Binary Builds (Keep configs / scripts if any) ===
-Mod_Local/Panel Game_Data/
-Mod_Local/GameAssembly.dll
-Mod_Local/UnityPlayer.dll
-Mod_Local/Panel Game.exe
-Mod_Local/baselib.dll
-Mod_Local/UnityCrashHandler64.exe
-
-# === Ripped Assets & Tool Dumps ===
-tools/
-PanelGame_UnityProject/
-
-# === Temporary Scratch Scripts ===
-scratch/*.class
-AWN_Version/scratch/*.class

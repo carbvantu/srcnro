@@ -1,0 +1,1 @@
+Get-ChildItem 'C:\Users\vtson\Downloads\AWN_Version\PanelGame_UnityProject\ExportedProject\Assets\Texture2D' | Where-Object { $_.Name -match "bg|back|goku|super|login|map|hill|logo" } | Select-Object Name, Length
